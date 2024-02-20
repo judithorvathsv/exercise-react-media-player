@@ -1,6 +1,7 @@
 import { useState } from "react";
 import NavBar from "./NavBar";
 import SongItem from "./SongItem";
+import Player from "./Player";
 
 let songs: Array<{ album: string; song: string; performedBy: string; albumPicture: string; id: number; source: string }> = [];
 
@@ -146,6 +147,7 @@ export function App() {
     return performedByWithSpace.indexOf("-") >= 0 ? performedByWithSpace.substring(0, performedByWithSpace.indexOf("-")) : performedByWithSpace;
   }
 
+  let randomSongsStorage = localStorage.getItem("randomSongs");
   while (randomSongIndexes.length < numberOfSongs) {
     let randomIndex = randomIntFromInterval(1, songs.length);
     if (!randomSongIndexes.includes(randomIndex)) {
@@ -154,16 +156,30 @@ export function App() {
         if (songs[i].id == randomIndex) {
           songs[i].song = cleanSongName(songs, i);
           songs[i].performedBy = cleanPerformedBy(songs, i);
-          selectedSongs.push(songs[i]);
+
+          if (randomSongsStorage == null || randomSongsStorage == undefined) {
+            selectedSongs.push(songs[i]);
+          }
         }
       }
     }
   }
 
+  if (randomSongsStorage == null || randomSongsStorage == undefined) {
+    localStorage.setItem("randomSongs", JSON.stringify(selectedSongs));
+  } else {
+    let randomSongsStorageString = JSON.parse(randomSongsStorage);
+    randomSongsStorageString.forEach((song: any) => {
+      selectedSongs.push(song);
+    });
+  }
+
   const [selectedSongId, setSelectedSongId] = useState(0);
+  const [selectedSongAudioUrl, setSelectedSongAudioUrl] = useState("");
 
   const handleClickedSong = (e: any) => {
     e.preventDefault();
+    e.stopPropagation();
 
     let clickedSongDiv = e.target.parentElement;
     if (clickedSongDiv.children[1].children[3] !== undefined) {
@@ -184,59 +200,19 @@ export function App() {
   };
 
   let clickedSongObject = getSelectedSong(selectedSongId);
-  const imgUrl = new URL(`./assets/songlist/${clickedSongObject?.source}`, import.meta.url).href;
-  console.log(imgUrl);
 
-  const clearList = () => {
-    /*     console.log("click");
-    selectedSongs = [];
-    let songsInTheListAsHtml = document.getElementById("songSection");
-    songsInTheListAsHtml = null; */
-  };
+  const imgUrl = new URL(`./assets/songlist/${clickedSongObject?.albumPicture}`, import.meta.url).href;
+  const audioUrl = new URL(`./assets/songlist/${clickedSongObject?.source}`, import.meta.url).href;
 
   return (
     <>
       <NavBar />
       <hr></hr>
       <main>
-        <button id="clear" onClick={clearList}>
-          Clear List
-        </button>
-        <section id="player">
-          <audio>
-            <source src={imgUrl}></source>
-          </audio>
-          <img id="playerPicture" src={imgUrl} alt="" />
-          <h2 id="playedSongtitle">{clickedSongObject?.song}</h2>
-          <h3 id="artist">{clickedSongObject?.performedBy}</h3>
-          <h4 id="album">{clickedSongObject?.album}</h4>
-          <input id="slider" type="range" min="1" max="100" value="0" />
-          <div id="timesDiv">
-            <span id="elapsedTime">00:00</span>
-            <span id="timeLength">00:00</span>
-          </div>
-          <div id="buttonsDiv">
-            <span id="goBackButton" className="material-symbols-outlined">
-              arrow_back_ios_new
-            </span>
-            <span id="goForwardButton" className="material-symbols-outlined">
-              arrow_forward_ios
-            </span>
-            <span id="pauseAndStartButton" className="pauseButton material-symbols-outlined">
-              not_started
-            </span>
-            <span id="loopButton" className="material-symbols-outlined">
-              laps
-            </span>
-            <span id="shuffleButton" className="material-symbols-outlined">
-              shuffle
-            </span>
-          </div>
-          <span hidden>{"playlistIndex"}</span>
-        </section>
+        <Player audioUrl={audioUrl} imgUrl={imgUrl} clickedSongObject={clickedSongObject} />
         <section id="songSection">
           {selectedSongs.map((selectedSong) => (
-            <button id="songItemAsButton" onClick={(event: any) => handleClickedSong(event)}>
+            <button id="songItemAsButton" onClick={(event: any) => handleClickedSong(event)} key={selectedSong.id}>
               <SongItem
                 album={selectedSong.album}
                 name={selectedSong.song}

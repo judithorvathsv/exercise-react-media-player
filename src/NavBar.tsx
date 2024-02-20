@@ -1,4 +1,4 @@
-function NavBar() {
+function NavBar():JSX.Element {
   return (
     <header>
       <span id="title">Music Player</span>
