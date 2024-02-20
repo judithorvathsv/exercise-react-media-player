@@ -133,16 +133,16 @@ export function App() {
   let numberOfSongs = 10;
   let randomSongIndexes: number[] = [];
 
-  function randomIntFromInterval(min: number, max: number) {
+  function randomIntFromInterval(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  function cleanSongName(songs: any, index: number) {
+  function cleanSongName(songs: any, index: number): string {
     let songNameWithSpace = songs[index].song.replaceAll("_", " ");
     return songNameWithSpace.indexOf("-") >= 0 ? songNameWithSpace.substring(0, songNameWithSpace.indexOf("-")) : songNameWithSpace;
   }
 
-  function cleanPerformedBy(songs: any, index: number) {
+  function cleanPerformedBy(songs: any, index: number): string {
     let performedByWithSpace = songs[index].performedBy.replaceAll("_", " ");
     return performedByWithSpace.indexOf("-") >= 0 ? performedByWithSpace.substring(0, performedByWithSpace.indexOf("-")) : performedByWithSpace;
   }
